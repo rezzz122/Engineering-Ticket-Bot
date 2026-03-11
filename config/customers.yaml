@@ -3,7 +3,9 @@ customers:
     jira_customer_name: "Aurex Capital"
     jira_project_key: "ORCH"
     team_name: "Fin Technology"
-    slack_channel_id: "C0ADP0JUSDU"
+    slack_channel_ids:
+      - "C0ADP0JUSDU"
+      - "C0A64NMNCMN"
 
   # Add additional customers below:
   # - name: "Acme Corp"

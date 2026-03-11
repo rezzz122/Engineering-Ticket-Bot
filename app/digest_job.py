@@ -44,11 +44,13 @@ async def run_all_digests() -> None:
             # 3. Build Slack Block Kit blocks
             blocks = build_blocks(customer_name, enriched)
 
-            # 4. Post to Slack channel
-            await post_to_channel(customer["slack_channel_id"], blocks)
+            # 4. Post to all Slack channels for this customer
+            channel_ids = customer.get("slack_channel_ids") or [customer["slack_channel_id"]]
+            for channel_id in channel_ids:
+                await post_to_channel(channel_id, blocks)
 
             logger.info(
-                f"Digest posted for {customer_name} ({len(enriched)} tickets)"
+                f"Digest posted for {customer_name} to {len(channel_ids)} channel(s) ({len(enriched)} tickets)"
             )
 
         except Exception as e:
