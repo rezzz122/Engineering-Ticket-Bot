@@ -59,7 +59,7 @@ Generate the Slack digest message now.\
 """
 
     message = await client.messages.create(
-        model="claude-sonnet-4-5-20251022",
+        model="claude-sonnet-4-5",
         max_tokens=1024,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_prompt}],
