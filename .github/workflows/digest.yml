@@ -2,6 +2,7 @@ name: Jira Digest
 
 on:
   schedule:
+    - cron: "15 6 * * *"   # TEST: 12:15 PM BD (UTC+6)
     - cron: "0 14 * * *"   # 9:00 AM EST (UTC-5)
     - cron: "0 2 * * *"    # 9:00 PM EST (next day UTC)
   workflow_dispatch:        # allow manual trigger from GitHub UI
