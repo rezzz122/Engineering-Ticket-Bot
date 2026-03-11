@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from app.jira_client import get_open_tickets
 from app.pylon_client import get_pylon_ticket_id
-from app.message_generator import generate_digest
+from app.message_generator import build_blocks
 from app.slack_client import post_to_channel
 from app.database import get_customers
 
@@ -41,15 +41,11 @@ async def run_all_digests() -> None:
                     }
                 )
 
-            # 3. Generate message via Claude API
-            message = await generate_digest(
-                customer_name,
-                customer["team_name"],
-                enriched,
-            )
+            # 3. Build Slack Block Kit blocks
+            blocks = build_blocks(customer_name, enriched)
 
             # 4. Post to Slack channel
-            await post_to_channel(customer["slack_channel_id"], message)
+            await post_to_channel(customer["slack_channel_id"], blocks)
 
             logger.info(
                 f"Digest posted for {customer_name} ({len(enriched)} tickets)"

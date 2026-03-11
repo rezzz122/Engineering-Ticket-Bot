@@ -32,14 +32,15 @@ async def test_run_all_digests_full_flow():
         patch("app.digest_job.get_customers", new=AsyncMock(return_value=SAMPLE_CUSTOMERS)),
         patch("app.digest_job.get_open_tickets", new=AsyncMock(return_value=SAMPLE_JIRA_TICKETS)),
         patch("app.digest_job.get_pylon_ticket_id", new=AsyncMock(return_value="616")),
-        patch("app.digest_job.generate_digest", new=AsyncMock(return_value=":wave: Digest message")),
+        patch("app.digest_job.build_blocks", return_value=[{"type": "header"}]) as mock_blocks,  # noqa: F841
         patch("app.digest_job.post_to_channel", new=AsyncMock()) as mock_post,
     ):
         from app.digest_job import run_all_digests
 
         await run_all_digests()
 
-    mock_post.assert_called_once_with("C0123AUREX", ":wave: Digest message")
+    mock_blocks.assert_called_once()
+    mock_post.assert_called_once_with("C0123AUREX", [{"type": "header"}])
 
 
 @pytest.mark.asyncio

@@ -13,6 +13,8 @@ SAMPLE_JIRA_RESPONSE = {
                 "status": {"name": "Work in Progress"},
                 "duedate": None,
                 "priority": {"name": "High"},
+                "customfield_10389": "Aurex Capital",
+                "created": "2026-03-05T10:00:00.000+0000",
             },
         },
         {
@@ -22,6 +24,8 @@ SAMPLE_JIRA_RESPONSE = {
                 "status": {"name": "Backlog"},
                 "duedate": None,
                 "priority": {"name": "Medium"},
+                "customfield_10389": "Aurex Capital",
+                "created": "2026-03-07T10:00:00.000+0000",
             },
         },
     ]

@@ -1,73 +1,50 @@
 from __future__ import annotations
 
-import anthropic
-from app.config import settings
-
-client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
-
-SYSTEM_PROMPT = """\
-You are a customer-facing bot that posts engineering ticket status updates in Slack.
-Generate a digest message using EXACTLY this format:
-
-👋 Fin.com Engineering Team Here!
-We're actively working on your issue and will share 
-updates soon. Thanks for your patience!
-
-✅ ORCH-116 (Pylon #691)
-• Fin API - Stability Improvements (Phase 1)
-• Status: Done
-• 📅 Due: ___
-• ⏳ Days Open: 6
-
-⚠️ ORCH-107 (Pylon #819)
-• nSave - PDF upload rejecting proof_of_address
-• Status: In Progress
-• 📅 Due: ___
-• ⏳ Days Open: 6
-
-Rules:
-- Use ✅ emoji for tickets with status "Done" or "Ready for Release"
-- Use ⚠️ emoji for everything else (Backlog, To-Do, In Progress, Work In Progress)
-- Use "Pylon #X" not "Pylon Ticket Number = X"
-- Use • (unicode bullet) not * for detail lines
-- Add 📅 before Due and ⏳ before Days Open
-- Keep the intro message exactly as shown
-- Blank line between each ticket
-- Group by customer name if multiple customers
-- No bold on Pylon number anymore\
-"""
+_DONE_STATUSES = {"Done", "Ready for Release"}
 
 
-async def generate_digest(
-    customer_name: str,
-    team_name: str,
-    tickets: list[dict],
-) -> str:
-    ticket_data = "\n".join(
-        [
-            f"- Jira Key: {t['jira_key']}, "
-            f"Pylon ID: {t['pylon_id']}, "
-            f"Summary: {t['summary']}, "
-            f"Status: {t['status']}, "
-            f"Due Date: {t.get('due_date', '')}, "
-            f"Days Open: {t.get('days_open', 0)}"
-            for t in tickets
-        ]
-    )
+def _strip_customer_prefix(summary: str, customer_name: str) -> str:
+    """Remove 'CustomerName - ' prefix from summary if present."""
+    first_word = customer_name.split()[0]
+    if " - " in summary and summary.split(" - ")[0].strip() in customer_name:
+        return summary.split(" - ", 1)[1].strip()
+    return summary
 
-    user_prompt = f"""\
-Customer: {customer_name}
-Team: {team_name}
-Open tickets:
-{ticket_data}
 
-Generate the Slack digest message now.\
-"""
+def build_blocks(customer_name: str, tickets: list[dict]) -> list[dict]:
+    blocks: list[dict] = [
+        {
+            "type": "header",
+            "text": {"type": "plain_text", "text": "👋 Fin.com Engineering Team Here!", "emoji": True},
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "We're actively working on your issue and will share updates soon. Thanks for your patience!",
+            },
+        },
+        {"type": "divider"},
+        {
+            "type": "header",
+            "text": {"type": "plain_text", "text": customer_name, "emoji": True},
+        },
+    ]
 
-    message = await client.messages.create(
-        model="claude-sonnet-4-5",
-        max_tokens=1024,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_prompt}],
-    )
-    return message.content[0].text
+    for i, t in enumerate(tickets):
+        emoji = "✅" if t["status"] in _DONE_STATUSES else "⚠️"
+        pylon = f"(Pylon #{t['pylon_id']})" if t.get("pylon_id") else ""
+        due = t.get("due_date") or "___"
+        summary = _strip_customer_prefix(t["summary"], customer_name)
+        text = (
+            f"{emoji} *{t['jira_key']}* {pylon}\n"
+            f"{summary}\n"
+            f"Status: {t['status']}\n"
+            f"📅 Due: {due}\n"
+            f"⏳ Days Open: {t.get('days_open', 0)}"
+        )
+        blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": text}})
+        if i < len(tickets) - 1:
+            blocks.append({"type": "divider"})
+
+    return blocks

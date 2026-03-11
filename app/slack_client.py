@@ -4,7 +4,7 @@ import httpx
 from app.config import settings
 
 
-async def post_to_channel(channel_id: str, message: str) -> dict:
+async def post_to_channel(channel_id: str, blocks: list[dict]) -> dict:
     async with httpx.AsyncClient() as client:
         response = await client.post(
             "https://slack.com/api/chat.postMessage",
@@ -14,7 +14,8 @@ async def post_to_channel(channel_id: str, message: str) -> dict:
             },
             json={
                 "channel": channel_id,
-                "text": message,
+                "text": "Fin.com Engineering Digest",  # fallback for notifications
+                "blocks": blocks,
                 "unfurl_links": False,
             },
             timeout=15.0,
