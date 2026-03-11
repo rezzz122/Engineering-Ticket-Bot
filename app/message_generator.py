@@ -3,7 +3,7 @@ from __future__ import annotations
 import anthropic
 from app.config import settings
 
-client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
 
 SYSTEM_PROMPT = """\
 You are a customer-facing bot that posts engineering ticket status updates in Slack.
@@ -58,7 +58,7 @@ Open tickets:
 Generate the Slack digest message now.\
 """
 
-    message = client.messages.create(
+    message = await client.messages.create(
         model="claude-sonnet-4-5-20251022",
         max_tokens=1024,
         system=SYSTEM_PROMPT,
