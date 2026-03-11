@@ -36,6 +36,10 @@ jobs:
           python -c "
           import asyncio, logging
           logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+          from app.database import init_db
           from app.digest_job import run_all_digests
-          asyncio.run(run_all_digests())
+          async def main():
+              await init_db()
+              await run_all_digests()
+          asyncio.run(main())
           "
