@@ -1,0 +1,16 @@
+customers:
+  - name: "Aurex Capital"
+    jira_customer_name: "Aurex Capital"
+    jira_project_key: "ORCH"
+    team_name: "Fin Technology"
+    slack_channel_id: "C0ADP0JUSDU"
+
+  # Add additional customers below:
+  # - name: "Acme Corp"
+  #   jira_customer_name: "Acme Corp"
+  #   jira_project_key: "PLAT"
+  #   team_name: "Platform Engineering"
+  #   slack_channel_id: "C0456ACME"
+  #   ticket_mappings:
+  #     PLAT-10: "101"
+  #     PLAT-11: "102"
