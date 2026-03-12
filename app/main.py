@@ -4,7 +4,6 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.database import init_db
-from app.scheduler import start_scheduler, stop_scheduler
 from app.digest_job import run_all_digests
 
 logging.basicConfig(
@@ -18,10 +17,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-    start_scheduler()
-    logger.info("Scheduler started — digests will run at 9AM and 9PM EST")
     yield
-    stop_scheduler()
 
 
 app = FastAPI(title="Jira → Slack Digest Bot", lifespan=lifespan)
